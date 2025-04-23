@@ -16,20 +16,17 @@ const app = express();
 // Connect to MongoDB
 connectToDb();
 
-// Enable CORS for frontend (local + production)
-const cors = require("cors");
-
-// Allow only your frontend's Vercel URL
+// Allowed origins
 const allowedOrigins = [
-  "http://localhost:5173", // For local development
-  "https://uber-clone-for-deploy.vercel.app" // Your deployed frontend
+  "http://localhost:5173",
+  "https://uber-clone-for-deploy.vercel.app"
 ];
 
+// Enable CORS
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
 }));
-
 
 // Middleware
 app.use(express.json());
@@ -42,9 +39,9 @@ app.get("/", (req, res) => {
 });
 
 // API Routes
-app.use('/users', userRoutes);
-app.use('/captains', captainRoutes);
-app.use('/maps', mapsRoutes);
-app.use('/rides', ridesRoutes);
+app.use("/users", userRoutes);
+app.use("/captains", captainRoutes);
+app.use("/maps", mapsRoutes);
+app.use("/rides", ridesRoutes);
 
 module.exports = app;

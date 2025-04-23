@@ -7,37 +7,47 @@ let io;
 function initializeSocket(server) {
   io = socketIo(server, {
     cors: {
-      origin: "*",
+      origin: [
+        "http://localhost:5173",
+        "https://uber-clone-for-deploy.vercel.app"
+      ],
       methods: ["GET", "POST"],
+      credentials: true,
     },
   });
 
   io.on("connection", (socket) => {
     console.log(`Client connected: ${socket.id}`);
 
-    socket.on("join", async (data) => {
-      const { userId, userType } = data;
+    socket.on("join", async ({ userId, userType }) => {
+      try {
+        if (!userId || !userType) return;
 
-      if (userType === "user") {
-        await userModel.findByIdAndUpdate(userId, { socketId: socket.id });
-      } else if (userType === "captain") {
-        await captainModel.findByIdAndUpdate(userId, { socketId: socket.id });
+        if (userType === "user") {
+          await userModel.findByIdAndUpdate(userId, { socketId: socket.id });
+        } else if (userType === "captain") {
+          await captainModel.findByIdAndUpdate(userId, { socketId: socket.id });
+        }
+      } catch (err) {
+        console.error("Join Error:", err.message);
       }
     });
 
-    socket.on("update-location-captain", async (data) => {
-      const { userId, location } = data;
+    socket.on("update-location-captain", async ({ userId, location }) => {
+      try {
+        if (!userId || !location || !location.ltd || !location.lng) {
+          return socket.emit("error", { message: "Invalid location data" });
+        }
 
-      if (!location || !location.ltd || !location.lng) {
-        return socket.emit("error", { message: "Invalid location data" });
+        await captainModel.findByIdAndUpdate(userId, {
+          location: {
+            ltd: location.ltd,
+            lng: location.lng,
+          },
+        });
+      } catch (err) {
+        console.error("Location Update Error:", err.message);
       }
-
-      await captainModel.findByIdAndUpdate(userId, {
-        location: {
-          ltd: location.ltd,
-          lng: location.lng,
-        },
-      });
     });
 
     socket.on("disconnect", () => {
@@ -46,12 +56,12 @@ function initializeSocket(server) {
   });
 }
 
-const sendMessageToSocketId = (socketId, messageObject) => {
-  if (io) {
+function sendMessageToSocketId(socketId, messageObject) {
+  if (io && socketId && messageObject?.event) {
     io.to(socketId).emit(messageObject.event, messageObject.data);
   } else {
-    console.log("Socket.io not initialized.");
+    console.log("Socket.io not initialized or invalid message.");
   }
-};
+}
 
 module.exports = { initializeSocket, sendMessageToSocketId };
