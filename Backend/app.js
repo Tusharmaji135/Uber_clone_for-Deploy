@@ -17,15 +17,19 @@ const app = express();
 connectToDb();
 
 // Enable CORS for frontend (local + production)
+const cors = require("cors");
+
+// Allow only your frontend's Vercel URL
 const allowedOrigins = [
   "http://localhost:5173", // For local development
-  "https://uber-clone-for-deploy-noulhvzyx-tushars-projects-aa2ac571.vercel.app" // Your Vercel frontend URL
+  "https://uber-clone-for-deploy.vercel.app" // Your deployed frontend
 ];
 
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
 }));
+
 
 // Middleware
 app.use(express.json());
