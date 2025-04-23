@@ -18,7 +18,7 @@ connectToDb();
 
 // Enable CORS for frontend (local + production)
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://your-frontend.vercel.app'], // ✅ Replace with your actual frontend Vercel URL
+  origin: ['http://localhost:5173', 'https://uber-clone-for-deploy.onrender.com'], // ✅ Replace with your actual frontend Vercel URL
   credentials: true
 }));
 
